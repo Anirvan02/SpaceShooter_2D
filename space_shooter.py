@@ -5,7 +5,7 @@ pygame.mixer.init()
 
 WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Spaceshooter!")
+pygame.display.set_caption("SpaceShooter 2D")
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -19,6 +19,8 @@ BULLET_FIRE_SOUND = pygame.mixer.Sound('Assets/Assets_Gun+Silencer.mp3')
 
 HEALTH_FONT = pygame.font.SysFont('comicsans', 40)
 WINNER_FONT = pygame.font.SysFont('comicsans', 100)
+START_FONT_LARGE = pygame.font.SysFont('comicsans', 50)
+START_FONT_SMALL = pygame.font.SysFont('comicsans', 30)
 
 FPS = 60
 VEL = 5
@@ -35,7 +37,15 @@ YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(YELLOW_SPACESH
 RED_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_red.png'))
 RED_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
 
-SPACE = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'space.png')), (WIDTH, HEIGHT))
+SPACE = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'space.jpeg')), (WIDTH, HEIGHT))
+
+def draw_start_screen():
+    WIN.blit(SPACE, (0, 0))
+    welcome_text = START_FONT_LARGE.render("Welcome to SpaceShooter 2D", 1, WHITE)
+    enter_text = START_FONT_SMALL.render("Press Enter to Start", 1, WHITE)
+    WIN.blit(welcome_text, (WIDTH/2 - welcome_text.get_width()/2, HEIGHT/2 - welcome_text.get_height()/2 - 30))
+    WIN.blit(enter_text, (WIDTH/2 - enter_text.get_width()/2, HEIGHT/2 - enter_text.get_height()/2 + 30))
+    pygame.display.update()
 
 def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
     WIN.blit(SPACE, (0, 0))
@@ -60,7 +70,7 @@ def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_hea
 def yellow_handle_movement(keys_pressed, yellow):
     if keys_pressed[pygame.K_a] and yellow.x - VEL > 0:  # LEFT
         yellow.x -= VEL
-    if keys_pressed[pygame.K_d] and yellow.x + VEL + yellow.width < BORDER.x:  # RIGHT
+    if keys_pressed[pygame.K_d] and yellow.x + VEL + yellow.width < BORDER.x + 15:  # RIGHT
         yellow.x += VEL
     if keys_pressed[pygame.K_w] and yellow.y - VEL > 0:  # UP
         yellow.y -= VEL
@@ -70,13 +80,12 @@ def yellow_handle_movement(keys_pressed, yellow):
 def red_handle_movement(keys_pressed, red):
     if keys_pressed[pygame.K_LEFT] and red.x - VEL > BORDER.x + BORDER.width:  # LEFT
         red.x -= VEL
-    if keys_pressed[pygame.K_RIGHT] and red.x + VEL + red.width < WIDTH:  # RIGHT
+    if keys_pressed[pygame.K_RIGHT] and red.x + VEL + red.width < WIDTH + 15:  # RIGHT
         red.x += VEL
     if keys_pressed[pygame.K_UP] and red.y - VEL > 0:  # UP
         red.y -= VEL
     if keys_pressed[pygame.K_DOWN] and red.y + VEL + red.height < HEIGHT - 15:  # DOWN
         red.y += VEL
-
 
 def handle_bullets(yellow_bullets, red_bullets, yellow, red):
     for bullet in yellow_bullets:
@@ -113,6 +122,8 @@ def main():
 
     clock = pygame.time.Clock()
     run = True
+    game_active = False
+    
     while run:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -121,6 +132,9 @@ def main():
                 pygame.quit()
 
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN and not game_active:
+                    game_active = True
+
                 if event.key == pygame.K_LCTRL and len(yellow_bullets) < MAX_BULLETS:
                     bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height//2 - 2, 10, 5)
                     yellow_bullets.append(bullet)
@@ -138,6 +152,10 @@ def main():
             if event.type == YELLOW_HIT:
                 yellow_health -= 1
                 BULLET_HIT_SOUND.play()
+
+        if not game_active:
+            draw_start_screen()
+            continue
 
         winner_text = ""
         if red_health <= 0:
