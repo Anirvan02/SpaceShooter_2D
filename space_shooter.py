@@ -3,7 +3,7 @@ import os
 pygame.font.init()
 pygame.mixer.init()
 
-WIDTH, HEIGHT = 900, 500
+WIDTH, HEIGHT = 1280, 720
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("SpaceShooter 2D")
 
@@ -12,49 +12,57 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 
-BORDER = pygame.Rect(WIDTH//2 - 5, 0, 10, HEIGHT)
+BORDER = pygame.Rect(WIDTH // 2 - 5, 0, 10, HEIGHT)
 
 BULLET_HIT_SOUND = pygame.mixer.Sound('Assets/Assets_Grenade+1.mp3')
 BULLET_FIRE_SOUND = pygame.mixer.Sound('Assets/Assets_Gun+Silencer.mp3')
 
-HEALTH_FONT = pygame.font.SysFont('comicsans', 40)
-WINNER_FONT = pygame.font.SysFont('comicsans', 100)
-START_FONT_LARGE = pygame.font.SysFont('comicsans', 50)
-START_FONT_SMALL = pygame.font.SysFont('comicsans', 30)
+HEALTH_FONT = pygame.font.SysFont('comicsans', 30)
+WINNER_FONT = pygame.font.SysFont('comicsans', 80)
+START_FONT_LARGE = pygame.font.SysFont('comicsans', 40)
+START_FONT_SMALL = pygame.font.SysFont('comicsans', 25)
 
 FPS = 60
-VEL = 5
-BULLET_VEL = 10
+VEL = 8
+BULLET_VEL = 14
 MAX_BULLETS = 5
-SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
+SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 60, 45
 
 YELLOW_HIT = pygame.USEREVENT + 1
-RED_HIT = pygame.USEREVENT + 2
+RED_HIT = pygame.USEREVENT + 1
 
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_yellow.png'))
-YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(YELLOW_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90)
+YELLOW_SPACESHIP = pygame.transform.rotate(
+    pygame.transform.scale(YELLOW_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90)
 
 RED_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_red.png'))
-RED_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
+RED_SPACESHIP = pygame.transform.rotate(
+    pygame.transform.scale(RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
 
 SPACE = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'space.jpeg')), (WIDTH, HEIGHT))
 
 def draw_start_screen():
     WIN.blit(SPACE, (0, 0))
     welcome_text = START_FONT_LARGE.render("Welcome to SpaceShooter 2D", 1, WHITE)
-    enter_text = START_FONT_SMALL.render("Press Enter to Start", 1, WHITE)
-    WIN.blit(welcome_text, (WIDTH/2 - welcome_text.get_width()/2, HEIGHT/2 - welcome_text.get_height()/2 - 30))
-    WIN.blit(enter_text, (WIDTH/2 - enter_text.get_width()/2, HEIGHT/2 - enter_text.get_height()/2 + 30))
+    click_text = START_FONT_SMALL.render("Click Here to Start", 1, WHITE)
+    click_text_rect = click_text.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 30))
+
+    WIN.blit(welcome_text, (WIDTH / 2 - welcome_text.get_width() / 2, HEIGHT / 2 - welcome_text.get_height() / 2 - 30))
+    WIN.blit(click_text, click_text_rect.topleft)
+    
     pygame.display.update()
+
+    return click_text_rect
 
 def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
     WIN.blit(SPACE, (0, 0))
     pygame.draw.rect(WIN, BLACK, BORDER)
 
-    red_health_text = HEALTH_FONT.render("Health: " + str(red_health), 1, WHITE)
-    yellow_health_text = HEALTH_FONT.render("Health: " + str(yellow_health), 1, WHITE)
-    WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
-    WIN.blit(yellow_health_text, (10, 10))
+    red_health_text = HEALTH_FONT.render("Health: " + str(red_health), 1, RED)
+    yellow_health_text = HEALTH_FONT.render("Health: " + str(yellow_health), 1, YELLOW)
+    
+    WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 15, 15))
+    WIN.blit(yellow_health_text, (15, 15))
 
     WIN.blit(YELLOW_SPACESHIP, (yellow.x, yellow.y))
     WIN.blit(RED_SPACESHIP, (red.x, red.y))
@@ -106,13 +114,13 @@ def handle_bullets(yellow_bullets, red_bullets, yellow, red):
 
 def draw_winner(text):
     draw_text = WINNER_FONT.render(text, 1, WHITE)
-    WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() / 2, HEIGHT/2 - draw_text.get_height()/2))
+    WIN.blit(draw_text, (WIDTH / 2 - draw_text.get_width() / 2, HEIGHT / 2 - draw_text.get_height() / 2))
     pygame.display.update()
     pygame.time.delay(3000)
 
 def main():
-    red = pygame.Rect(700, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
-    yellow = pygame.Rect(100, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+    red = pygame.Rect(1000, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+    yellow = pygame.Rect(200, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
 
     red_bullets = []
     yellow_bullets = []
@@ -123,7 +131,7 @@ def main():
     clock = pygame.time.Clock()
     run = True
     game_active = False
-    
+
     while run:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -131,17 +139,24 @@ def main():
                 run = False
                 pygame.quit()
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN and not game_active:
-                    game_active = True
+            if not game_active:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if start_click_rect.collidepoint(event.pos):
+                        BULLET_FIRE_SOUND.play()
+                        game_active = True
 
+                draw_start_screen()
+                start_click_rect = draw_start_screen()
+                continue
+
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LCTRL and len(yellow_bullets) < MAX_BULLETS:
-                    bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height//2 - 2, 10, 5)
+                    bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height // 2 - 2, 10, 5)
                     yellow_bullets.append(bullet)
                     BULLET_FIRE_SOUND.play()
 
                 if event.key == pygame.K_RCTRL and len(red_bullets) < MAX_BULLETS:
-                    bullet = pygame.Rect(red.x, red.y + red.height//2 - 2, 10, 5)
+                    bullet = pygame.Rect(red.x, red.y + red.height // 2 - 2, 10, 5)
                     red_bullets.append(bullet)
                     BULLET_FIRE_SOUND.play()
 
