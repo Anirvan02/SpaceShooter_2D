@@ -23,13 +23,13 @@ START_FONT_LARGE = pygame.font.SysFont('comicsans', 40)
 START_FONT_SMALL = pygame.font.SysFont('comicsans', 25)
 
 FPS = 60
-VEL = 8
-BULLET_VEL = 14
+VEL = 10
+BULLET_VEL = 20
 MAX_BULLETS = 5
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 60, 45
 
 YELLOW_HIT = pygame.USEREVENT + 1
-RED_HIT = pygame.USEREVENT + 1
+RED_HIT = pygame.USEREVENT + 2
 
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_yellow.png'))
 YELLOW_SPACESHIP = pygame.transform.rotate(
@@ -173,10 +173,10 @@ def main():
             continue
 
         winner_text = ""
-        if red_health <= 0:
+        if red_health == 0:
             winner_text = "Yellow Wins!"
 
-        if yellow_health <= 0:
+        if yellow_health == 0:
             winner_text = "Red Wins!"
 
         if winner_text != "":
