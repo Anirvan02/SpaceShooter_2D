@@ -16,11 +16,12 @@ BORDER = pygame.Rect(WIDTH // 2 - 5, 0, 10, HEIGHT)
 
 BULLET_HIT_SOUND = pygame.mixer.Sound('Assets/Assets_Grenade+1.mp3')
 BULLET_FIRE_SOUND = pygame.mixer.Sound('Assets/Assets_Gun+Silencer.mp3')
+BLAST_SOUND = pygame.mixer.Sound('Assets/explosion.mp3')
 
 HEALTH_FONT = pygame.font.SysFont('comicsans', 30)
 WINNER_FONT = pygame.font.SysFont('comicsans', 80)
-START_FONT_LARGE = pygame.font.SysFont('comicsans', 40)
-START_FONT_SMALL = pygame.font.SysFont('comicsans', 25)
+START_FONT_LARGE = pygame.font.SysFont('comicsans', 60)
+START_FONT_SMALL = pygame.font.SysFont('comicsans', 35)
 
 FPS = 60
 VEL = 10
@@ -32,12 +33,11 @@ YELLOW_HIT = pygame.USEREVENT + 1
 RED_HIT = pygame.USEREVENT + 2
 
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_yellow.png'))
-YELLOW_SPACESHIP = pygame.transform.rotate(
-    pygame.transform.scale(YELLOW_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90)
+BLAST_FRAMES = [pygame.image.load(os.path.join('Assets', f'blast_{i}.gif')) for i in range(1, 18)]
+YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(YELLOW_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90)
 
 RED_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_red.png'))
-RED_SPACESHIP = pygame.transform.rotate(
-    pygame.transform.scale(RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
+RED_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
 
 SPACE = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'space.jpeg')), (WIDTH, HEIGHT))
 
@@ -45,9 +45,9 @@ def draw_start_screen():
     WIN.blit(SPACE, (0, 0))
     welcome_text = START_FONT_LARGE.render("Welcome to SpaceShooter 2D", 1, WHITE)
     click_text = START_FONT_SMALL.render("Click Here to Start", 1, WHITE)
-    click_text_rect = click_text.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 30))
+    click_text_rect = click_text.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 40))
 
-    WIN.blit(welcome_text, (WIDTH / 2 - welcome_text.get_width() / 2, HEIGHT / 2 - welcome_text.get_height() / 2 - 30))
+    WIN.blit(welcome_text, (WIDTH / 2 - welcome_text.get_width() / 2, HEIGHT / 2 - welcome_text.get_height() / 2 - 40))
     WIN.blit(click_text, click_text_rect.topleft)
     
     pygame.display.update()
@@ -112,11 +112,30 @@ def handle_bullets(yellow_bullets, red_bullets, yellow, red):
         elif bullet.x < 0:
             red_bullets.remove(bullet)
 
-def draw_winner(text):
-    draw_text = WINNER_FONT.render(text, 1, WHITE)
+def draw_blast(spaceship_rect):
+    for frame in BLAST_FRAMES:
+        WIN.blit(SPACE, (spaceship_rect.x - 10, spaceship_rect.y - 10), pygame.Rect(spaceship_rect.x - 10, spaceship_rect.y - 10, spaceship_rect.width + 40, spaceship_rect.height + 60))
+
+        scaled_blast = pygame.transform.scale(frame, (spaceship_rect.width + 40, spaceship_rect.height + 60))
+        WIN.blit(scaled_blast, (spaceship_rect.x - 10, spaceship_rect.y - 10))
+        
+        pygame.display.update()
+        pygame.time.delay(50)
+
+
+def draw_winner(text, red, yellow):
+    if text == "Red Wins!":
+        BLAST_SOUND.play()
+        draw_blast(yellow)
+        draw_text = WINNER_FONT.render(text, 1, RED)
+    elif text == "Yellow Wins!":
+        BLAST_SOUND.play()
+        draw_blast(red)
+        draw_text = WINNER_FONT.render(text, 1, YELLOW)
+
     WIN.blit(draw_text, (WIDTH / 2 - draw_text.get_width() / 2, HEIGHT / 2 - draw_text.get_height() / 2))
     pygame.display.update()
-    pygame.time.delay(3000)
+    pygame.time.delay(1000)
 
 def main():
     red = pygame.Rect(1000, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
@@ -182,16 +201,15 @@ def main():
             winner_text = "Red Wins!"
 
         if winner_text != "":
-            draw_winner(winner_text)
-            break
+            draw_winner(winner_text, red, yellow)
+            pygame.time.delay(1000)
+            main()
+            return
 
         keys_pressed = pygame.key.get_pressed()
         yellow_handle_movement(keys_pressed, yellow)
         red_handle_movement(keys_pressed, red)
-
         handle_bullets(yellow_bullets, red_bullets, yellow, red)
-
-    main()
 
 if __name__ == "__main__":
     main()
