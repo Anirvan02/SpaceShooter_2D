@@ -171,6 +171,8 @@ def main():
         if not game_active:
             draw_start_screen()
             continue
+        
+        draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health)
 
         winner_text = ""
         if red_health == 0:
@@ -188,8 +190,6 @@ def main():
         red_handle_movement(keys_pressed, red)
 
         handle_bullets(yellow_bullets, red_bullets, yellow, red)
-
-        draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health)
 
     main()
 
